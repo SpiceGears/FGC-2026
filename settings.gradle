@@ -1,6 +1,4 @@
-import org.gradle.api.initialization.resolve.RepositoriesMode
-
-prluginManagement {
+pluginManagement {
     repositories {
         google()
         mavenCentral()
@@ -17,7 +15,7 @@ dependencyResolutionManagement {
         maven { url = uri("https://jitpack.io") }
 
         maven { url = uri("https://repo.dairy.foundation/releases") }
-        maven { url = uri("https://repo.dairy.foundation/releases") }
+        maven { url = uri('https://maven.brott.dev/') }
     }
 }
 
