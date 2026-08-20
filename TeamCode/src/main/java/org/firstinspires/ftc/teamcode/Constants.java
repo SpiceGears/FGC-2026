@@ -28,6 +28,7 @@ public final class Constants {
         // Clutch
         public static final double SERVO_DISENGAGED = 0;
         public static final double SERVO_ENGAGED = 0;
+        public static final double SPINUP_TIMEOUT = 1.2; // seconds
 
         private ShooterConstants() {}
     }
