@@ -8,8 +8,7 @@ public class ClutchSubsystem extends SubsystemBase {
 
     public enum Mode {
         INTAKE,
-        SHOOTER,
-        FEEDER_AND_SHOOTER
+        SHOOTER
     }
 
     private Mode currentMode;
@@ -29,15 +28,11 @@ public class ClutchSubsystem extends SubsystemBase {
         switch (mode) {
             case INTAKE:
                 servo1.set(1);
-                servo2.set(0);
+                servo2.set(1);
                 break;
             case SHOOTER:
                 servo1.set(0);
                 servo2.set(0);
-                break;
-            case FEEDER_AND_SHOOTER:
-                servo1.set(0);
-                servo2.set(1);
                 break;
         }
     }

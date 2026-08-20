@@ -4,17 +4,20 @@ import com.seattlesolvers.solverslib.command.CommandBase;
 
 import org.firstinspires.ftc.teamcode.Constants;
 import org.firstinspires.ftc.teamcode.Subsystems.ClutchSubsystem;
+import org.firstinspires.ftc.teamcode.Subsystems.FeederClimbSubsystem;
 import org.firstinspires.ftc.teamcode.Subsystems.MechanismSubsystem;
 
 public class ShooterCommand extends CommandBase {
     private final MechanismSubsystem mechanism;
     private final ClutchSubsystem clutch;
+    private final FeederClimbSubsystem feeder;
 
-    public ShooterCommand(MechanismSubsystem mechanism, ClutchSubsystem clutch) {
+    public ShooterCommand(MechanismSubsystem mechanism, ClutchSubsystem clutch, FeederClimbSubsystem feeder) {
         this.mechanism = mechanism;
         this.clutch = clutch;
+        this.feeder = feeder;
 
-        addRequirements(mechanism, clutch);
+        addRequirements(mechanism, clutch, feeder);
     }
 
     @Override
@@ -26,7 +29,7 @@ public class ShooterCommand extends CommandBase {
     @Override
     public void execute() {
         if(mechanism.atShooterSpeed()) {
-            clutch.setMode(ClutchSubsystem.Mode.FEEDER_AND_SHOOTER);
+            feeder.runFeeder(1);
         }
     }
 
