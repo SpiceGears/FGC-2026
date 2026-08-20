@@ -7,29 +7,23 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.seattlesolvers.solverslib.command.SubsystemBase;
 
 public class DriveSubsystem extends SubsystemBase {
-    private final DcMotorEx leftFront, leftBack, rightFront, rightBack;
+
+    private final DcMotorEx leftDrive;
+    private final DcMotorEx rightDrive;
 
     public DriveSubsystem(final HardwareMap hwMap) {
-        leftFront = hwMap.get(DcMotorEx.class, "leftFront");
-        leftBack = hwMap.get(DcMotorEx.class, "leftBack");
-        rightFront = hwMap.get(DcMotorEx.class, "rightFront");
-        rightBack = hwMap.get(DcMotorEx.class, "rightBack");
+        leftDrive = hwMap.get(DcMotorEx.class, "leftDrive");
+        rightDrive = hwMap.get(DcMotorEx.class, "rightDrive");
 
-        leftFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        leftBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        rightFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        rightBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        leftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rightDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        rightFront.setDirection(DcMotorSimple.Direction.REVERSE);
-        rightBack.setDirection(DcMotorSimple.Direction.REVERSE);
+        rightDrive.setDirection(DcMotorSimple.Direction.REVERSE);
     }
 
     public void tankDrive(double left, double right) {
-        leftFront.setPower(left);
-        leftBack.setPower(left);
-
-        rightFront.setPower(right);
-        rightBack.setPower(right);
+        leftDrive.setPower(left);
+        rightDrive.setPower(right);
     }
 
     public void stop() {
