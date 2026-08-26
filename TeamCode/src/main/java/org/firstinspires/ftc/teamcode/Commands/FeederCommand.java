@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.Commands;
 import com.seattlesolvers.solverslib.command.CommandBase;
 
 import org.firstinspires.ftc.teamcode.Subsystems.FeederClimbSubsystem;
+import org.firstinspires.ftc.teamcode.Constants.FeederConstants;
 
 public class FeederCommand extends CommandBase {
     private final FeederClimbSubsystem feeder;
@@ -15,7 +16,7 @@ public class FeederCommand extends CommandBase {
 
     @Override
     public void initialize() {
-        feeder.runFeeder(1);
+        feeder.runFeeder(FeederConstants.POWER);
     }
 
     @Override

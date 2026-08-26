@@ -6,7 +6,8 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.seattlesolvers.solverslib.command.SubsystemBase;
 
-import org.firstinspires.ftc.teamcode.Constants;
+import org.firstinspires.ftc.teamcode.Constants.FeederConstants;
+import org.firstinspires.ftc.teamcode.Constants.ShooterConstants;
 
 public class ShooterSubsystem extends SubsystemBase {
     private final DcMotorEx rightShooter;
@@ -14,32 +15,32 @@ public class ShooterSubsystem extends SubsystemBase {
     private final DcMotorEx feeder;
 
     public ShooterSubsystem(HardwareMap hwMap) {
-        rightShooter = hwMap.get(DcMotorEx.class, "rightShooter");
-        leftShooter = hwMap.get(DcMotorEx.class, "leftShooter");
-        feeder = hwMap.get(DcMotorEx.class, "feeder");
+        rightShooter = hwMap.get(DcMotorEx.class, ShooterConstants.RIGHT_SHOOTER_MOTOR);
+        leftShooter = hwMap.get(DcMotorEx.class, ShooterConstants.LEFT_SHOOTER_MOTOR);
+        feeder = hwMap.get(DcMotorEx.class, FeederConstants.MOTOR);
 
-        rightShooter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        leftShooter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        rightShooter.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-        leftShooter.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        rightShooter.setMode(ShooterConstants.RUN_MODE);
+        leftShooter.setMode(ShooterConstants.RUN_MODE);
+        rightShooter.setZeroPowerBehavior(ShooterConstants.ZERO_POWER_BEHAVIOR);
+        leftShooter.setZeroPowerBehavior(ShooterConstants.ZERO_POWER_BEHAVIOR);
 
         leftShooter.setVelocityPIDFCoefficients(
-                Constants.ShooterConstants.kP,
-                Constants.ShooterConstants.kI,
-                Constants.ShooterConstants.kD,
-                Constants.ShooterConstants.kF
+                ShooterConstants.KP,
+                ShooterConstants.KI,
+                ShooterConstants.KD,
+                ShooterConstants.KF
         );
 
         rightShooter.setVelocityPIDFCoefficients(
-                Constants.ShooterConstants.kP,
-                Constants.ShooterConstants.kI,
-                Constants.ShooterConstants.kD,
-                Constants.ShooterConstants.kF
+                ShooterConstants.KP,
+                ShooterConstants.KI,
+                ShooterConstants.KD,
+                ShooterConstants.KF
         );
 
-        rightShooter.setDirection(DcMotorSimple.Direction.REVERSE);
+        rightShooter.setDirection(ShooterConstants.RIGHT_MOTOR_DIRECTION);
 
-        feeder.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        feeder.setZeroPowerBehavior(FeederConstants.ZERO_POWER_BEHAVIOR);
     }
 
     public void setShooterRPM(double rpm) {
@@ -62,8 +63,8 @@ public class ShooterSubsystem extends SubsystemBase {
 
     public boolean atSpeed() {
         return Math.abs(
-                getShooterRPM() - Constants.ShooterConstants.TARGET_RPM
-        ) <= Constants.ShooterConstants.RPM_TOLERANCE;
+                getShooterRPM() - ShooterConstants.TARGET_RPM
+        ) <= ShooterConstants.RPM_TOLERANCE;
     }
 
     public void stopShooter() {
@@ -85,10 +86,11 @@ public class ShooterSubsystem extends SubsystemBase {
     }
 
     private double rpmToTicksPerSecond(double rpm) {
-        return rpm * Constants.ShooterConstants.TICKS_PER_REV / 60.0;
+        return rpm * ShooterConstants.TICKS_PER_REV * ShooterConstants.GEAR_RATIO / 60.0;
     }
     private double ticksPerSecondToRPM(double ticksPerSecond) {
-        return ticksPerSecond * 60.0 / Constants.ShooterConstants.TICKS_PER_REV;
+        return ticksPerSecond * 60.0
+                / (ShooterConstants.TICKS_PER_REV * ShooterConstants.GEAR_RATIO);
     }
 
 }

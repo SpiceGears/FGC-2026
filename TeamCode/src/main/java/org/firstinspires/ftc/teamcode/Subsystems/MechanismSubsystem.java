@@ -6,7 +6,8 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.seattlesolvers.solverslib.command.SubsystemBase;
 
-import org.firstinspires.ftc.teamcode.Constants;
+import org.firstinspires.ftc.teamcode.Constants.MechanismConstants;
+import org.firstinspires.ftc.teamcode.Constants.ShooterConstants;
 
 public class MechanismSubsystem extends SubsystemBase {
     private final DcMotorEx motor1;
@@ -16,38 +17,31 @@ public class MechanismSubsystem extends SubsystemBase {
     private final DcMotorEx[] motors;
 
     public MechanismSubsystem(HardwareMap hwMap) {
-        motor1 = hwMap.get(DcMotorEx.class, "motor1");
-        motor2 = hwMap.get(DcMotorEx.class, "motor2");
-        motor3 = hwMap.get(DcMotorEx.class, "motor3");
-        motor4 = hwMap.get(DcMotorEx.class, "motor4");
+        motor1 = hwMap.get(DcMotorEx.class, MechanismConstants.MOTOR_1);
+        motor2 = hwMap.get(DcMotorEx.class, MechanismConstants.MOTOR_2);
+        motor3 = hwMap.get(DcMotorEx.class, MechanismConstants.MOTOR_3);
+        motor4 = hwMap.get(DcMotorEx.class, MechanismConstants.MOTOR_4);
 
         motors = new DcMotorEx[]{motor1, motor2, motor3, motor4};
 
         for (DcMotorEx motor : motors) {
-            motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+            motor.setMode(MechanismConstants.RUN_MODE);
+            motor.setZeroPowerBehavior(MechanismConstants.ZERO_POWER_BEHAVIOR);
             motor.setVelocityPIDFCoefficients(
-                    Constants.ShooterConstants.kP,
-                    Constants.ShooterConstants.kI,
-                    Constants.ShooterConstants.kD,
-                    Constants.ShooterConstants.kF);
+                    ShooterConstants.KP,
+                    ShooterConstants.KI,
+                    ShooterConstants.KD,
+                    ShooterConstants.KF);
         }
 
-        motor2.setDirection(DcMotorSimple.Direction.REVERSE);
-        motor3.setDirection(DcMotorSimple.Direction.REVERSE);
+        motor4.setDirection(MechanismConstants.MOTOR_4_DIRECTION);
+        motor3.setDirection(MechanismConstants.MOTOR_3_DIRECTION);
     }
 
     public void setPower(double power) {
         for (DcMotorEx motor : motors) {
             motor.setPower(power);
         }
-    }
-
-    public void runIntake(double power) {
-        motor1.setPower(power);
-        motor2.setPower(power);
-        motor3.setPower(0);
-        motor4.setPower(0);
     }
 
     public void setShooterRPM(double rpm) {
@@ -61,9 +55,9 @@ public class MechanismSubsystem extends SubsystemBase {
         for (DcMotorEx motor : motors) {
             double vel = motor.getVelocity();
             double rpm = Math.abs(ticksPerSecondToRPM(vel));
-            double diff = Math.abs(rpm - Constants.ShooterConstants.TARGET_RPM);
+            double diff = Math.abs(rpm - ShooterConstants.TARGET_RPM);
 
-            if (diff > Constants.ShooterConstants.RPM_TOLERANCE) {
+            if (diff > ShooterConstants.RPM_TOLERANCE) {
                 return false;
             }
         }
@@ -81,11 +75,12 @@ public class MechanismSubsystem extends SubsystemBase {
 
     private double rpmToTicksPerSecond(double rpm) {
         double rps = rpm / 60;
-        return rps * Constants.ShooterConstants.TICKS_PER_REV;
+        return rps * ShooterConstants.TICKS_PER_REV * ShooterConstants.GEAR_RATIO;
     }
 
     private double ticksPerSecondToRPM(double ticksPerSecond) {
-        double rps = ticksPerSecond / Constants.ShooterConstants.TICKS_PER_REV;
+        double rps = ticksPerSecond
+                / (ShooterConstants.TICKS_PER_REV * ShooterConstants.GEAR_RATIO);
         return rps * 60;
     }
 

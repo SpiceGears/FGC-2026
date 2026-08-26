@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.Commands;
 import com.seattlesolvers.solverslib.command.CommandBase;
 
 import org.firstinspires.ftc.teamcode.Subsystems.FeederClimbSubsystem;
+import org.firstinspires.ftc.teamcode.Constants.ArmConstants;
 
 public class ReverseArmCommand extends CommandBase {
     private final FeederClimbSubsystem arm;
@@ -15,12 +16,13 @@ public class ReverseArmCommand extends CommandBase {
 
     @Override
     public void initialize() {
-        arm.deployArm(1);
+        arm.deployArm(ArmConstants.REVERSE_POWER);
     }
 
     @Override
     public boolean isFinished() {
-        return arm.isArmLimit();
+//        return arm.isArmLimit();
+        return false;
     }
 
     @Override

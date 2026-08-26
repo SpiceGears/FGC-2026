@@ -1,8 +1,10 @@
 package org.firstinspires.ftc.teamcode.Subsystems;
 
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.seattlesolvers.solverslib.command.SubsystemBase;
-import com.seattlesolvers.solverslib.hardware.servos.ServoEx;
+
+import org.firstinspires.ftc.teamcode.Constants.ClutchConstants;
 
 public class ClutchSubsystem extends SubsystemBase {
 
@@ -12,14 +14,13 @@ public class ClutchSubsystem extends SubsystemBase {
     }
 
     private Mode currentMode;
-    private final ServoEx servo1;
-    private final ServoEx servo2;
+    private final Servo servo;
 
     public ClutchSubsystem(HardwareMap hwMap) {
-        servo1 = hwMap.get(ServoEx.class, "servo1");
-        servo2 = hwMap.get(ServoEx.class, "servo2");
+        servo = hwMap.get(Servo.class, ClutchConstants.SERVO);
+        servo.setDirection(ClutchConstants.DIRECTION);
 
-        setMode(Mode.SHOOTER);
+        setMode(Mode.INTAKE);
     }
 
     public void setMode(Mode mode) {
@@ -27,12 +28,10 @@ public class ClutchSubsystem extends SubsystemBase {
 
         switch (mode) {
             case INTAKE:
-                servo1.set(1);
-                servo2.set(1);
+                servo.setPosition(ClutchConstants.INTAKE_POSITION);
                 break;
             case SHOOTER:
-                servo1.set(0);
-                servo2.set(0);
+                servo.setPosition(ClutchConstants.SHOOTER_POSITION);
                 break;
         }
     }

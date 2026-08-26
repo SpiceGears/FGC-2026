@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.Commands;
 import com.seattlesolvers.solverslib.command.CommandBase;
 
 import org.firstinspires.ftc.teamcode.Subsystems.DriveSubsystem;
+import org.firstinspires.ftc.teamcode.Constants.DriveConstants;
 
 import java.util.function.DoubleSupplier;
 
@@ -29,10 +30,10 @@ public class DriveCommand extends CommandBase {
         double left = leftSupplier.getAsDouble();
         double right = rightSupplier.getAsDouble();
 
-        if(Math.abs(left) < 0.05)
+        if(Math.abs(left) < DriveConstants.STICK_DEADZONE)
             left = 0;
 
-        if(Math.abs(right) < 0.05)
+        if(Math.abs(right) < DriveConstants.STICK_DEADZONE)
             right = 0;
 
         drive.tankDrive(left, right);

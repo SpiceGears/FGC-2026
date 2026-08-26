@@ -5,20 +5,21 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.seattlesolvers.solverslib.command.SubsystemBase;
 
-import org.firstinspires.ftc.teamcode.Constants;
+import org.firstinspires.ftc.teamcode.Constants.FeederConstants;
+import org.firstinspires.ftc.teamcode.Constants.ShooterConstants;
 
 public class IntakeSubsystem extends SubsystemBase {
     private final DcMotorEx shooter;
     private final DcMotorEx feeder;
 
     public IntakeSubsystem(HardwareMap hwMap) {
-        shooter = hwMap.get(DcMotorEx.class, "shooter");
-        feeder = hwMap.get(DcMotorEx.class, "feeder");
+        shooter = hwMap.get(DcMotorEx.class, ShooterConstants.SHOOTER_MOTOR);
+        feeder = hwMap.get(DcMotorEx.class, FeederConstants.MOTOR);
 
-        shooter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        shooter.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        shooter.setMode(ShooterConstants.RUN_MODE);
+        shooter.setZeroPowerBehavior(ShooterConstants.ZERO_POWER_BEHAVIOR);
 
-        feeder.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        feeder.setZeroPowerBehavior(FeederConstants.ZERO_POWER_BEHAVIOR);
     }
 
     public void setShooterRPM(double rpm) {
@@ -47,9 +48,10 @@ public class IntakeSubsystem extends SubsystemBase {
     }
 
     private double rpmToTicksPerSecond(double rpm) {
-        return rpm * Constants.ShooterConstants.TICKS_PER_REV / 60.0;
+        return rpm * ShooterConstants.TICKS_PER_REV * ShooterConstants.GEAR_RATIO / 60.0;
     }
     private double ticksPerSecondToRPM(double ticksPerSecond) {
-        return ticksPerSecond * 60.0 / Constants.ShooterConstants.TICKS_PER_REV;
+        return ticksPerSecond * 60.0
+                / (ShooterConstants.TICKS_PER_REV * ShooterConstants.GEAR_RATIO);
     }
 }
