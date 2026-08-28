@@ -24,6 +24,9 @@ android {
 }
 
 repositories {
+
+    maven { url 'https://jitpack.io' }
+
     maven {
         url = 'https://maven.brott.dev/'
     }
@@ -44,6 +47,8 @@ repositories {
 dependencies {
     implementation project(':FtcRobotController')
     annotationProcessor files('lib/OpModeAnnotationProcessor.jar')
+    implementation 'com.github.ori-coval.Koala-Log:KoalaLogger:1.5.8test'
+    annotationProcessor 'com.github.ori-coval.Koala-Log:KoalaLoggingProcessor:1.5.8test'
 
     // SolversLib: Latest Stable Version
 

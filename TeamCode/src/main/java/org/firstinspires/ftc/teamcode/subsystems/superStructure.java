@@ -15,6 +15,7 @@ public class superStructure extends SubsystemBase {
     private final PIDFController pidf;
 
     private double targetRpm = 0.0;
+    private double direction = 1.0;
 
     public superStructure(HardwareMap hwMap) {
         m1 = new MotorEx(hwMap, robotConstants.SuperStructure.M1, flywheelPIDF.Shooter.CPR, flywheelPIDF.Shooter.RPM);
@@ -38,7 +39,9 @@ public class superStructure extends SubsystemBase {
     public void setTargetRpm(double rpm) { targetRpm = rpm; pidf.setSetPoint(rpm); }
     public boolean atSpeed() { return pidf.atSetPoint(); }
 
-    public void setPower(double power) { motors.set(power); }
+    public void setPower(double power) { motors.set(power * direction); }
+    public void toggleDirection() { direction = -direction; }
+    public boolean isReversed() { return direction < 0.0; }
 
     public void stop() {
         targetRpm = 0.0;

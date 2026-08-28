@@ -13,6 +13,8 @@ public class polandFinal extends OpMode {
     private shootCommand shootCommand;
     private boolean lastTrigger = false;
 
+    // TODO: add shooter PIDF, Vision, Arm with potentiometer and else.........
+
     @Override
     public void init() {
         structure = new superStructure(hardwareMap);

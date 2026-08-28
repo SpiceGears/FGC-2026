@@ -11,7 +11,7 @@ public final class robotConstants {
         public static final String M4 = "motor4";
 
         public static final double SHOOT_POWER = 1.0;
-        public static final double INTAKE_POWER = 1.0;
+        public static final double INTAKE_POWER = -1.0;
     }
 
     public static final class Clutch {
@@ -19,7 +19,7 @@ public final class robotConstants {
         public static final String SERVO = "clutchServo";
 
         public static final double SHOOT = 0.0;
-        public static final double INTAKE = 1.0;
+        public static final double INTAKE = 0.8;
     }
 
     public static final class Feeder {
@@ -43,5 +43,15 @@ public final class robotConstants {
 
         public static final String LEFT = "leftDrive";
         public static final String RIGHT = "rightDrive";
+
+        public static final double THROTTLE_DEADBAND = 0.02;
+        public static final double WHEEL_DEADBAND = 0.02;
+
+        public static final double AUTO_QUICK_TURN_THROTTLE = 0.15;
+
+        public static final double CURVATURE_TURN_GAIN = 1.0;
+        public static final double CURVATURE_QUICK_TURN_GAIN = 0.7;
+
+        public static final double QUICK_TURN_THROTTLE_SCALE = 0.0;
     }
 }

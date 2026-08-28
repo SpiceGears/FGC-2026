@@ -23,11 +23,41 @@ public class driveSubsystem extends SubsystemBase {
         drive = new DifferentialDrive(left, right);
     }
 
-    public void arcade(double forward, double turn) {
-        drive.arcadeDrive(forward, turn);
+    public void cheesyDrive(double throttle, double wheel, boolean isQuickTurn) {
+        throttle = handleDeadband(throttle, robotConstants.Drive.THROTTLE_DEADBAND);
+        wheel = handleDeadband(wheel, robotConstants.Drive.WHEEL_DEADBAND);
+
+        boolean autoQuickTurn = Math.abs(throttle) < robotConstants.Drive.AUTO_QUICK_TURN_THROTTLE;
+        boolean quickTurn = isQuickTurn || autoQuickTurn;
+
+        if (isQuickTurn) {
+            throttle *= robotConstants.Drive.QUICK_TURN_THROTTLE_SCALE;
+        }
+
+        double angularPower;
+        if (quickTurn) {
+            angularPower = wheel * robotConstants.Drive.CURVATURE_QUICK_TURN_GAIN;
+        } else {
+            angularPower = Math.abs(throttle) * wheel * robotConstants.Drive.CURVATURE_TURN_GAIN;
+        }
+
+        double leftPower = throttle + angularPower;
+        double rightPower = throttle - angularPower;
+
+        double max = Math.max(Math.abs(leftPower), Math.abs(rightPower));
+        if (max > 1.0) {
+            leftPower /= max;
+            rightPower /= max;
+        }
+
+        drive.tankDrive(leftPower, rightPower);
     }
 
     public void stop() {
         drive.stop();
+    }
+
+    private static double handleDeadband(double value, double deadband) {
+        return (Math.abs(value) > Math.abs(deadband)) ? value : 0.0;
     }
 }
