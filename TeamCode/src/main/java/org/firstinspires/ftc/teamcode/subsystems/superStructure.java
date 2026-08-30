@@ -9,7 +9,12 @@ import com.seattlesolvers.solverslib.hardware.motors.MotorGroup;
 import org.firstinspires.ftc.teamcode.constants.flywheelPIDF;
 import org.firstinspires.ftc.teamcode.constants.intakePIDF;
 import org.firstinspires.ftc.teamcode.constants.robotConstants;
+import org.firstinspires.ftc.teamcode.utils.motorUtils;
 
+import Ori.Coval.Logging.AutoLog;
+import Ori.Coval.Logging.AutoLogOutput;
+
+@AutoLog(postToFtcDashboard = false)
 public class superStructure extends SubsystemBase {
     public enum Mode { NONE, SHOOTER, INTAKE }
 
@@ -75,6 +80,18 @@ public class superStructure extends SubsystemBase {
 
     public Mode getMode() { return mode; }
     public double getVelocityRpm() { return m1.getVelocity(); }
+
+    @AutoLogOutput(postToFtcDashboard = false)
+    public double getM1Rpm() { return motorUtils.getRPM(m1); }
+
+    @AutoLogOutput(postToFtcDashboard = false)
+    public double getM2Rpm() { return motorUtils.getRPM(m2); }
+
+    @AutoLogOutput(postToFtcDashboard = false)
+    public double getM3Rpm() { return motorUtils.getRPM(m3); }
+
+    @AutoLogOutput(postToFtcDashboard = false)
+    public double getM4Rpm() { return motorUtils.getRPM(m4); }
 
     public void setPower(double power) { motors.set(power * direction); }
     public void toggleDirection() { direction = -direction; }

@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.seattlesolvers.solverslib.command.CommandOpMode;
 import com.seattlesolvers.solverslib.gamepad.GamepadEx;
@@ -36,6 +38,9 @@ public class polandFinal extends CommandOpMode {
         driver = new GamepadEx(gamepad1);
         register(structure, clutch, feeder, arm, drive);
 
+        telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
+
+
         drive.setDefaultCommand(new cheesyDriveCommand(
                 drive,
                 () -> -gamepad1.left_stick_y,
@@ -67,12 +72,21 @@ public class polandFinal extends CommandOpMode {
             structure.stop();
         }
 
-        boolean feederGateOpen = structure.getVelocityRpm()
-                >= (flywheelPIDF.Shooter.TARGET_RPM - flywheelPIDF.Shooter.RPM_TOLERANCE);
-        if (shootHeld && feederGateOpen) {
-            feeder.feed();
+        boolean feederManualForward = gamepad1.dpad_right;
+        boolean feederManualReverse = gamepad1.dpad_left;
+
+        if (feederManualForward) {
+            feeder.setPower(robotConstants.Feeder.UP_POWER);
+        } else if (feederManualReverse) {
+            feeder.setPower(robotConstants.Feeder.DOWN_POWER);
         } else {
-            feeder.stop();
+            boolean feederGateOpen = structure.getVelocityRpm()
+                    >= (flywheelPIDF.Shooter.TARGET_RPM - flywheelPIDF.Shooter.RPM_TOLERANCE);
+            if (shootHeld && feederGateOpen) {
+                feeder.feed();
+            } else {
+                feeder.stop();
+            }
         }
 
         telemetry.addData("Mode", structure.getMode());
@@ -80,6 +94,8 @@ public class polandFinal extends CommandOpMode {
         telemetry.addData("At Speed", structure.atSpeed());
         telemetry.addData("Arm Position", arm.getPosition());
         telemetry.addData("Reversed", reverseHeld);
+        telemetry.addData("Feeder Mode", (feederManualForward || feederManualReverse) ? "Manual" : "Auto");
+        telemetry.addData("TargetRPM", flywheelPIDF.Shooter.TARGET_RPM);
         telemetry.update();
     }
 }
