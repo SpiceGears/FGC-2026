@@ -1,148 +1,143 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+
 import com.seattlesolvers.solverslib.command.CommandOpMode;
+import com.seattlesolvers.solverslib.command.CommandScheduler;
 import com.seattlesolvers.solverslib.command.button.Trigger;
+import com.seattlesolvers.solverslib.gamepad.GamepadEx;
+import com.seattlesolvers.solverslib.gamepad.GamepadKeys;
 
 import org.firstinspires.ftc.teamcode.Commands.ArmCommand;
 import org.firstinspires.ftc.teamcode.Commands.ClimbCommand;
-import org.firstinspires.ftc.teamcode.Commands.DriveCommand;
 import org.firstinspires.ftc.teamcode.Commands.FeederCommand;
 import org.firstinspires.ftc.teamcode.Commands.IntakeCommand;
-import org.firstinspires.ftc.teamcode.Commands.ReverseArmCommand;
-import org.firstinspires.ftc.teamcode.Commands.ReverseClimbCommand;
-import org.firstinspires.ftc.teamcode.Commands.ReverseFeederCommand;
-import org.firstinspires.ftc.teamcode.Commands.ReverseIntakeCommand;
 import org.firstinspires.ftc.teamcode.Commands.ShooterCommand;
-import org.firstinspires.ftc.teamcode.Subsystems.ClutchSubsystem;
-import org.firstinspires.ftc.teamcode.Subsystems.DriveSubsystem;
+import org.firstinspires.ftc.teamcode.Subsystems.ArmSubsystem;
 import org.firstinspires.ftc.teamcode.Subsystems.FeederClimbSubsystem;
-import org.firstinspires.ftc.teamcode.Subsystems.MechanismSubsystem;
-import org.firstinspires.ftc.teamcode.Constants.OperatorConstants;
 
 @TeleOp(name = "Poland Final")
 public class PolandFinal extends CommandOpMode {
 
-    private DriveSubsystem drive;
-    private MechanismSubsystem mechanism;
-    private ClutchSubsystem clutch;
-    private FeederClimbSubsystem feeder;
+    private final Robot robot = Robot.getInstance();
 
-    private Trigger intakeTrigger;
-    private Trigger shooterTrigger;
-
-    private Trigger reverseIntakeButton;
-    private Trigger reverseFeeder;
-    private Trigger climbUpButton;
-    private Trigger climbDownButton;
-    private Trigger armDeployButton;
-    private Trigger armReverseButton;
+    private GamepadEx driver;
 
     @Override
     public void initialize() {
+        super.reset();
 
-        drive = new DriveSubsystem(hardwareMap);
-        mechanism = new MechanismSubsystem(hardwareMap);
-        clutch = new ClutchSubsystem(hardwareMap);
-        feeder = new FeederClimbSubsystem(hardwareMap);
+        // =========================
+        // ROBOT
+        // =========================
 
-        /*
-         * Physical controls
-         *
-         * RT -> Intake
-         * LT -> Shooter
-         * RB -> Reverse intake
-         * DPad Up -> Climb
-         * DPad Down -> Reverse climb
-         * Square -> Deploy arm
-         * Cross -> Reverse arm
-         */
+        robot.init(hardwareMap);
 
-        intakeTrigger = new Trigger(
-                () -> gamepad1.right_trigger > OperatorConstants.TRIGGER_THRESHOLD
+        driver = new GamepadEx(gamepad1);
+
+
+        // =========================
+        // INTAKE
+        // =========================
+
+        // RT -> Intake
+        new Trigger(() ->
+                driver.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.5
+        ).whileActiveContinuous(
+                new IntakeCommand(1.0)
         );
 
-        shooterTrigger = new Trigger(
-                () -> gamepad1.left_trigger > OperatorConstants.TRIGGER_THRESHOLD
+        // RB -> Reverse Intake
+        driver.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER)
+                .whileActiveContinuous(
+                        new IntakeCommand(-1.0)
+                );
+
+
+        // =========================
+        // SHOOTER
+        // =========================
+
+        // LT -> Shooter
+        new Trigger(() ->
+                driver.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) > 0.1
+        ).whileActiveContinuous(
+                new ShooterCommand()
         );
 
-        reverseIntakeButton = new Trigger(
-                () -> gamepad1.right_bumper
-        );
 
-        climbUpButton = new Trigger(
-                () -> gamepad1.dpad_up
-        );
+        // =========================
+        // REVERSE FEEDER
+        // =========================
 
-        climbDownButton = new Trigger(
-                () -> gamepad1.dpad_down
-        );
+        // LB -> Reverse Feeder
+        driver.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER)
+                .whileActiveContinuous(
+                        new FeederCommand(
+                                FeederClimbSubsystem.State.REVERSE_FEED
+                        )
+                );
 
-        reverseFeeder = new Trigger(
-                () -> gamepad1.left_bumper
-        );
 
-        armReverseButton = new Trigger(
-                () -> gamepad1.cross
-        );
+        // =========================
+        // CLIMB
+        // =========================
 
-       drive.setDefaultCommand(
-               new DriveCommand(
-                       drive,
-                       () -> -gamepad1.right_stick_x,
-                       () -> -gamepad1.left_stick_y
-               )
-       );
+        // D-pad UP -> Climb Up
+        driver.getGamepadButton(GamepadKeys.Button.DPAD_UP)
+                .whileActiveContinuous(
+                        new ClimbCommand(
+                                FeederClimbSubsystem.State.CLIMB_UP
+                        )
+                );
 
-        configureBindings();
+        // D-pad DOWN -> Climb Down
+        driver.getGamepadButton(GamepadKeys.Button.DPAD_DOWN)
+                .whileActiveContinuous(
+                        new ClimbCommand(
+                                FeederClimbSubsystem.State.CLIMB_DOWN
+                        )
+                );
+
+
+        // =========================
+        // ARM
+        // =========================
+
+        // Y -> Arm Up
+        driver.getGamepadButton(GamepadKeys.Button.Y)
+                .whileActiveContinuous(
+                        new ArmCommand(ArmSubsystem.State.UP)
+                );
+
+        // X -> Arm Down
+        driver.getGamepadButton(GamepadKeys.Button.X)
+                .whileActiveContinuous(
+                        new ArmCommand(ArmSubsystem.State.DOWN)
+                );
     }
 
-    private void configureBindings() {
 
-        intakeTrigger.whileActiveOnce(
-                new IntakeCommand(
-                        mechanism,
-                        clutch
-                )
-        );
+    @Override
+    public void run() {
 
-        shooterTrigger.whileActiveOnce(
-                new ShooterCommand(
-                        mechanism,
-                        clutch,
-                        feeder
-                )
-        );
+        // =========================
+        // DRIVE
+        // =========================
 
-        reverseIntakeButton.whileActiveOnce(
-                new ReverseIntakeCommand(
-                        mechanism,
-                        clutch
-                )
-        );
+        if (CommandScheduler.getInstance().isAvailable(robot.drive)) {
 
-        climbUpButton.whileActiveOnce(
-                new ClimbCommand(
-                        feeder
-                )
-        );
+            double forward = driver.getLeftY();
+            double turn = driver.getRightX();
 
-        climbDownButton.whileActiveOnce(
-                new ReverseClimbCommand(
-                        feeder
-                )
-        );
+            robot.drive.tankDrive(forward, turn);
+        }
 
-        reverseFeeder.whileActiveOnce(
-                new ReverseFeederCommand(
-                        feeder
-                )
-        );
 
-        armReverseButton.whileActiveOnce(
-                new ReverseArmCommand(
-                        feeder
-                )
-        );
+        // =========================
+        // COMMAND SCHEDULER
+        // =========================
+
+        robot.updateLoop();
     }
 }

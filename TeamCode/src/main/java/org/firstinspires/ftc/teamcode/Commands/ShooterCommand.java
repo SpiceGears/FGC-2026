@@ -3,65 +3,50 @@ package org.firstinspires.ftc.teamcode.Commands;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.seattlesolvers.solverslib.command.CommandBase;
 
-import org.firstinspires.ftc.teamcode.Constants.ShooterConstants;
-import org.firstinspires.ftc.teamcode.Subsystems.ClutchSubsystem;
+import org.firstinspires.ftc.teamcode.Constants;
+import org.firstinspires.ftc.teamcode.Robot;
 import org.firstinspires.ftc.teamcode.Subsystems.FeederClimbSubsystem;
 import org.firstinspires.ftc.teamcode.Subsystems.MechanismSubsystem;
 
 public class ShooterCommand extends CommandBase {
 
-    private final MechanismSubsystem mechanism;
-    private final ClutchSubsystem clutch;
-    private final FeederClimbSubsystem feeder;
+    private final Robot robot = Robot.getInstance();
+    private final ElapsedTime timer = new ElapsedTime();
 
-    private final ElapsedTime clutchTimer = new ElapsedTime();
-    private boolean shooterStarted = false;
+    private boolean feeding = false;
 
-    public ShooterCommand(
-            MechanismSubsystem mechanism,
-            ClutchSubsystem clutch,
-            FeederClimbSubsystem feeder
-    ) {
-        this.mechanism = mechanism;
-        this.clutch = clutch;
-        this.feeder = feeder;
-
-        addRequirements(mechanism, clutch /*feeder*/);
+    public ShooterCommand() {
+        addRequirements(
+                robot.mechanism,
+                robot.feederClimb
+        );
     }
 
     @Override
     public void initialize() {
-        feeder.stop();
-        mechanism.stop();
-        clutch.setMode(ClutchSubsystem.Mode.SHOOTER);
+        feeding = false;
+        timer.reset();
 
-        shooterStarted = false;
-        clutchTimer.reset();
+        robot.mechanism.setMode(MechanismSubsystem.Mode.SHOOTER);
+        robot.mechanism.setShooterRPM(Constants.ShooterConstants.TARGET_RPM);
+        robot.feederClimb.stop();
     }
 
     @Override
     public void execute() {
-        if (!shooterStarted) {
-            if (clutchTimer.seconds() < ShooterConstants.CLUTCH_DELAY_SECONDS) {
-                return;
-            }
+        if (!feeding &&
+                (robot.mechanism.atShooterSpeed()
+                        || timer.seconds() >= 5)) {
 
-            if(mechanism.atShooterSpeed()) {
-                feeder.runFeeder(1);
-            }
-
-            mechanism.setShooterRPM(
-                    ShooterConstants.TARGET_RPM
-            );
-            shooterStarted = true;
+            robot.feederClimb.setState(FeederClimbSubsystem.State.FEED);
+            feeding = true;
         }
     }
 
     @Override
     public void end(boolean interrupted) {
-        feeder.stop();
-        mechanism.stop();
-        clutch.setMode(ClutchSubsystem.Mode.SHOOTER);
+        robot.mechanism.stop();
+        robot.feederClimb.stop();
     }
 
     @Override

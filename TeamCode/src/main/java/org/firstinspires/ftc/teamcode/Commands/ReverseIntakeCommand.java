@@ -3,7 +3,6 @@ package org.firstinspires.ftc.teamcode.Commands;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.seattlesolvers.solverslib.command.CommandBase;
 
-import org.firstinspires.ftc.teamcode.Subsystems.ClutchSubsystem;
 import org.firstinspires.ftc.teamcode.Subsystems.MechanismSubsystem;
 import org.firstinspires.ftc.teamcode.Constants.IntakeConstants;
 

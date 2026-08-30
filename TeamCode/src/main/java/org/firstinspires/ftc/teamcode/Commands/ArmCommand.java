@@ -2,31 +2,32 @@ package org.firstinspires.ftc.teamcode.Commands;
 
 import com.seattlesolvers.solverslib.command.CommandBase;
 
-import org.firstinspires.ftc.teamcode.Subsystems.FeederClimbSubsystem;
-import org.firstinspires.ftc.teamcode.Constants.ArmConstants;
+import org.firstinspires.ftc.teamcode.Robot;
+import org.firstinspires.ftc.teamcode.Subsystems.ArmSubsystem;
 
 public class ArmCommand extends CommandBase {
-    private final FeederClimbSubsystem arm;
+ 
+    private final Robot robot = Robot.getInstance();
+    private final ArmSubsystem.State state;
 
-    public ArmCommand(FeederClimbSubsystem arm) {
-        this.arm = arm;
+    public ArmCommand(ArmSubsystem.State state) {
+        this.state = state;
 
-        addRequirements(arm);
+        addRequirements(robot.arm);
     }
 
     @Override
     public void initialize() {
-        arm.deployArm(ArmConstants.POWER);
-    }
-
-    @Override
-    public boolean isFinished() {
-//        return arm.isArmLimit();
-        return false;
+        robot.arm.setState(state);
     }
 
     @Override
     public void end(boolean interrupted) {
-        arm.stopArm();
+        robot.arm.stop();
+    }
+
+    @Override
+    public boolean isFinished() {
+        return false;
     }
 }

@@ -18,10 +18,6 @@ public class Constants {
         public static String LEFT_MOTOR = "left_drive";
         public static String RIGHT_MOTOR = "right_drive";
         public static double STICK_DEADZONE = 0.05;
-        public static DcMotor.ZeroPowerBehavior ZERO_POWER_BEHAVIOR =
-                DcMotor.ZeroPowerBehavior.BRAKE;
-        public static DcMotorSimple.Direction RIGHT_MOTOR_DIRECTION =
-                DcMotorSimple.Direction.REVERSE;
         private DriveConstants() {}
     }
 
