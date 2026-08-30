@@ -27,10 +27,10 @@ public class superStructure extends SubsystemBase {
     private double direction = 1.0;
 
     public superStructure(HardwareMap hwMap) {
-        m1 = new MotorEx(hwMap, robotConstants.SuperStructure.M1, flywheelPIDF.Shooter.CPR, flywheelPIDF.Shooter.RPM);
-        m2 = new MotorEx(hwMap, robotConstants.SuperStructure.M2, flywheelPIDF.Shooter.CPR, flywheelPIDF.Shooter.RPM);
-        m3 = new MotorEx(hwMap, robotConstants.SuperStructure.M3, flywheelPIDF.Shooter.CPR, flywheelPIDF.Shooter.RPM);
-        m4 = new MotorEx(hwMap, robotConstants.SuperStructure.M4, flywheelPIDF.Shooter.CPR, flywheelPIDF.Shooter.RPM);
+        m1 = new MotorEx(hwMap, robotConstants.SuperStructure.M1);
+        m2 = new MotorEx(hwMap, robotConstants.SuperStructure.M2);
+        m3 = new MotorEx(hwMap, robotConstants.SuperStructure.M3);
+        m4 = new MotorEx(hwMap, robotConstants.SuperStructure.M4);
 
         m1.setInverted(false);
         m2.setInverted(false);
@@ -79,7 +79,7 @@ public class superStructure extends SubsystemBase {
     }
 
     public Mode getMode() { return mode; }
-    public double getVelocityRpm() { return m1.getVelocity(); }
+    public double getVelocityRpm() { return motorUtils.getRPM(m1); }
 
     @AutoLogOutput(postToFtcDashboard = false)
     public double getM1Rpm() { return motorUtils.getRPM(m1); }
@@ -115,10 +115,10 @@ public class superStructure extends SubsystemBase {
 
         switch (mode) {
             case SHOOTER:
-                motors.set(pidfShooter.calculate(m1.getVelocity()));
+                motors.set(pidfShooter.calculate(getVelocityRpm()));
                 break;
             case INTAKE:
-                motors.set(pidfIntake.calculate(m1.getVelocity()));
+                motors.set(pidfIntake.calculate(getVelocityRpm()));
                 break;
             case NONE:
             default:

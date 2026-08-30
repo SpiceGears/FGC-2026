@@ -7,12 +7,14 @@ public final class intakePIDF {
 
     @Config
     public static final class Intake {
+
+        // TODO
         public static double KP = 0;
         public static double KI = 0;
         public static double KD = 0;
         public static double KF = 0;
 
-        public static double TARGET_RPM = 1000.0;
-        public static double RPM_TOLERANCE = 200.0;
+        public static double TARGET_RPM = 2000;
+        public static double RPM_TOLERANCE = 400;
     }
 }
