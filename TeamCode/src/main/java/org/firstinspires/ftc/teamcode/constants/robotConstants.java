@@ -54,4 +54,12 @@ public final class robotConstants {
 
         public static final double QUICK_TURN_THROTTLE_SCALE = 0.0;
     }
+
+    public static final class Vision {
+
+        public static final String CAMERA = "Webcam 1";
+
+        public static final int TAG_ID = 1;
+        public static final double TAG_SIZE_METERS = 0.166;
+    }
 }

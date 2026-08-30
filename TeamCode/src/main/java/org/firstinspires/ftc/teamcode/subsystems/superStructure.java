@@ -7,14 +7,18 @@ import com.seattlesolvers.solverslib.hardware.motors.Motor;
 import com.seattlesolvers.solverslib.hardware.motors.MotorEx;
 import com.seattlesolvers.solverslib.hardware.motors.MotorGroup;
 import org.firstinspires.ftc.teamcode.constants.flywheelPIDF;
+import org.firstinspires.ftc.teamcode.constants.intakePIDF;
 import org.firstinspires.ftc.teamcode.constants.robotConstants;
 
 public class superStructure extends SubsystemBase {
+    public enum Mode { NONE, SHOOTER, INTAKE }
+
     private final MotorEx m1, m2, m3, m4;
     private final MotorGroup motors;
-    private final PIDFController pidf;
+    private final PIDFController pidfShooter;
+    private final PIDFController pidfIntake;
 
-    private double targetRpm = 0.0;
+    private Mode mode = Mode.NONE;
     private double direction = 1.0;
 
     public superStructure(HardwareMap hwMap) {
@@ -31,27 +35,77 @@ public class superStructure extends SubsystemBase {
         motors = new MotorGroup(m1, m2, m3, m4);
         motors.setRunMode(Motor.RunMode.RawPower);
 
-        pidf = new PIDFController(flywheelPIDF.Shooter.KP, flywheelPIDF.Shooter.KI,
+        pidfShooter = new PIDFController(flywheelPIDF.Shooter.KP, flywheelPIDF.Shooter.KI,
                 flywheelPIDF.Shooter.KD, flywheelPIDF.Shooter.KF);
-        pidf.setTolerance(flywheelPIDF.Shooter.RPM_TOLERANCE, Double.POSITIVE_INFINITY);
+        pidfShooter.setTolerance(flywheelPIDF.Shooter.RPM_TOLERANCE, Double.POSITIVE_INFINITY);
+
+        pidfIntake = new PIDFController(intakePIDF.Intake.KP, intakePIDF.Intake.KI,
+                intakePIDF.Intake.KD, intakePIDF.Intake.KF);
+        pidfIntake.setTolerance(intakePIDF.Intake.RPM_TOLERANCE, Double.POSITIVE_INFINITY);
     }
 
-    public void setTargetRpm(double rpm) { targetRpm = rpm; pidf.setSetPoint(rpm); }
-    public boolean atSpeed() { return pidf.atSetPoint(); }
+    public void setTargetRpm(double rpm) {
+        mode = Mode.SHOOTER;
+        pidfShooter.setSetPoint(rpm);
+    }
+
+    public void spinUpShooter() { spinUpShooter(false); }
+
+    public void spinUpShooter(boolean reversed) {
+        mode = Mode.SHOOTER;
+        double rpm = flywheelPIDF.Shooter.TARGET_RPM;
+        pidfShooter.setSetPoint(reversed ? -rpm : rpm);
+    }
+
+    public void spinUpIntake() { spinUpIntake(false); }
+
+    public void spinUpIntake(boolean reversed) {
+        mode = Mode.INTAKE;
+        double rpm = intakePIDF.Intake.TARGET_RPM;
+        pidfIntake.setSetPoint(reversed ? rpm : -rpm);
+    }
+
+    public boolean atSpeed() {
+        switch (mode) {
+            case SHOOTER: return pidfShooter.atSetPoint();
+            case INTAKE: return pidfIntake.atSetPoint();
+            default: return false;
+        }
+    }
+
+    public Mode getMode() { return mode; }
+    public double getVelocityRpm() { return m1.getVelocity(); }
 
     public void setPower(double power) { motors.set(power * direction); }
     public void toggleDirection() { direction = -direction; }
     public boolean isReversed() { return direction < 0.0; }
 
     public void stop() {
-        targetRpm = 0.0;
+        mode = Mode.NONE;
         motors.stopMotor();
+    }
+
+    private void refreshGainsFromConstants() {
+        pidfShooter.setPIDF(flywheelPIDF.Shooter.KP, flywheelPIDF.Shooter.KI, flywheelPIDF.Shooter.KD, flywheelPIDF.Shooter.KF);
+        pidfShooter.setTolerance(flywheelPIDF.Shooter.RPM_TOLERANCE, Double.POSITIVE_INFINITY);
+        pidfIntake.setPIDF(intakePIDF.Intake.KP, intakePIDF.Intake.KI, intakePIDF.Intake.KD, intakePIDF.Intake.KF);
+        pidfIntake.setTolerance(intakePIDF.Intake.RPM_TOLERANCE, Double.POSITIVE_INFINITY);
     }
 
     @Override
     public void periodic() {
+        refreshGainsFromConstants();
 
-        if (targetRpm <= 0.0) return;
-        motors.set(pidf.calculate(m1.getVelocity()));
+        switch (mode) {
+            case SHOOTER:
+                motors.set(pidfShooter.calculate(m1.getVelocity()));
+                break;
+            case INTAKE:
+                motors.set(pidfIntake.calculate(m1.getVelocity()));
+                break;
+            case NONE:
+            default:
+                break;
+        }
     }
 }
