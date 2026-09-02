@@ -10,11 +10,8 @@ import com.seattlesolvers.solverslib.gamepad.GamepadEx;
 import com.seattlesolvers.solverslib.gamepad.GamepadKeys;
 
 import org.firstinspires.ftc.teamcode.commands.cheesyDriveCommand;
-import org.firstinspires.ftc.teamcode.commands.armCommand;
 import org.firstinspires.ftc.teamcode.commands.feederCommand;
 import org.firstinspires.ftc.teamcode.constants.robotConstants;
-import org.firstinspires.ftc.teamcode.subsystems.armSubsystem;
-import org.firstinspires.ftc.teamcode.subsystems.armSubsystemAutoLogged;
 import org.firstinspires.ftc.teamcode.subsystems.clutchSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.driveSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.driveSubsystemAutoLogged;
@@ -33,7 +30,6 @@ public class simpleTeleOp extends CommandOpMode {
     private superStructure structure;
     private clutchSubsystem clutch;
     private feederSubsystem feeder;
-    private armSubsystem arm;
     private driveSubsystem drive;
     private GamepadEx driver;
 
@@ -55,11 +51,10 @@ public class simpleTeleOp extends CommandOpMode {
         structure = new superStructureAutoLogged(hardwareMap);
         clutch = new clutchSubsystem(hardwareMap);
         feeder = new feederSubsystemAutoLogged(hardwareMap);
-        arm = new armSubsystemAutoLogged(hardwareMap);
         drive = new driveSubsystemAutoLogged(hardwareMap);
 
         driver = new GamepadEx(gamepad1);
-        register(structure, clutch, feeder, arm, drive);
+        register(structure, clutch, feeder, drive);
 
 
 
@@ -75,17 +70,7 @@ public class simpleTeleOp extends CommandOpMode {
         driver.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT)
                 .whileHeld(new feederCommand(feeder, robotConstants.Feeder.UP_POWER));
         driver.getGamepadButton(GamepadKeys.Button.DPAD_LEFT)
-                .whileHeld(new feederCommand(feeder, robotConstants.Feeder.DOWN_POWER));
-
-
-
-
-        driver.getGamepadButton(GamepadKeys.Button.DPAD_UP)
-                .whileHeld(new armCommand(arm, robotConstants.Arm.UP_POWER));
-        driver.getGamepadButton(GamepadKeys.Button.DPAD_DOWN)
-                .whileHeld(new armCommand(arm, robotConstants.Arm.DOWN_POWER));
-
-        driver.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER)
+                .whileHeld(new feederCommand(feeder, robotConstants.Feeder.DOWN_POWER));        driver.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER)
                 .whenPressed(structure::toggleDirection);
     }
 

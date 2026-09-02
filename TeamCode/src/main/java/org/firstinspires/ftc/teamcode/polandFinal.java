@@ -9,8 +9,9 @@ import com.seattlesolvers.solverslib.gamepad.GamepadKeys;
 
 import org.firstinspires.ftc.teamcode.commands.armCommand;
 import org.firstinspires.ftc.teamcode.commands.cheesyDriveCommand;
+import org.firstinspires.ftc.teamcode.commands.feederAutoCommand;
+import org.firstinspires.ftc.teamcode.commands.shootIntakeCommand;
 import org.firstinspires.ftc.teamcode.constants.flywheelPIDF;
-import org.firstinspires.ftc.teamcode.constants.robotConstants;
 import org.firstinspires.ftc.teamcode.subsystems.armSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.clutchSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.driveSubsystem;
@@ -40,61 +41,49 @@ public class polandFinal extends CommandOpMode {
 
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
 
-
         drive.setDefaultCommand(new cheesyDriveCommand(
                 drive,
-                () -> -gamepad1.left_stick_y,
-                () -> gamepad1.right_stick_x,
-                () -> gamepad1.right_bumper
+                driver::getLeftY,
+                driver::getRightX,
+                () -> driver.getButton(GamepadKeys.Button.RIGHT_BUMPER)
         ));
 
-        driver.getGamepadButton(GamepadKeys.Button.LEFT_STICK_BUTTON)
-                .whileHeld(new armCommand(arm, robotConstants.Arm.UP_POWER));
-        driver.getGamepadButton(GamepadKeys.Button.RIGHT_STICK_BUTTON)
-                .whileHeld(new armCommand(arm, robotConstants.Arm.DOWN_POWER));
+        structure.setDefaultCommand(new shootIntakeCommand(
+                structure,
+                clutch,
+                () -> driver.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.5,
+                () -> driver.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) > 0.5,
+                () -> driver.getButton(GamepadKeys.Button.LEFT_BUMPER)
+        ));
+
+        feeder.setDefaultCommand(new feederAutoCommand(
+                feeder,
+                structure,
+                () -> driver.getButton(GamepadKeys.Button.DPAD_RIGHT),
+                () -> driver.getButton(GamepadKeys.Button.DPAD_LEFT),
+                () -> driver.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.5
+        ));
+
+        arm.setDefaultCommand(new armCommand(
+                arm,
+                () -> driver.getButton(GamepadKeys.Button.LEFT_STICK_BUTTON),
+                () -> driver.getButton(GamepadKeys.Button.RIGHT_STICK_BUTTON)
+        ));
     }
 
     @Override
     public void run() {
         super.run();
 
-        boolean shootHeld = gamepad1.right_trigger > 0.5;
-        boolean intakeHeld = gamepad1.left_trigger > 0.5;
-        boolean reverseHeld = gamepad1.left_bumper;
-
-        if (shootHeld) {
-            clutch.shoot();
-            structure.spinUpShooter(reverseHeld);
-        } else if (intakeHeld) {
-            clutch.intake();
-            structure.spinUpIntake(reverseHeld);
-        } else {
-            structure.stop();
-        }
-
-        boolean feederManualForward = gamepad1.dpad_right;
-        boolean feederManualReverse = gamepad1.dpad_left;
-
-        if (feederManualForward) {
-            feeder.setPower(robotConstants.Feeder.UP_POWER);
-        } else if (feederManualReverse) {
-            feeder.setPower(robotConstants.Feeder.DOWN_POWER);
-        } else {
-            boolean feederGateOpen = structure.getVelocityRpm()
-                    >= (flywheelPIDF.Shooter.TARGET_RPM - flywheelPIDF.Shooter.RPM_TOLERANCE);
-            if (shootHeld && feederGateOpen) {
-                feeder.feed();
-            } else {
-                feeder.stop();
-            }
-        }
-
         telemetry.addData("Mode", structure.getMode());
         telemetry.addData("Velocity RPM", structure.getVelocityRpm());
         telemetry.addData("At Speed", structure.atSpeed());
-        telemetry.addData("Arm Position", arm.getPosition());
-        telemetry.addData("Reversed", reverseHeld);
-        telemetry.addData("Feeder Mode", (feederManualForward || feederManualReverse) ? "Manual" : "Auto");
+        telemetry.addData("Arm Position", arm.getMotorPosition());
+        telemetry.addData("Arm Angle", arm.getAngle());
+        telemetry.addData("Arm Target Angle", arm.getTargetAngle());
+        telemetry.addData("Reversed", driver.getButton(GamepadKeys.Button.LEFT_BUMPER));
+        telemetry.addData("Feeder Mode", (driver.getButton(GamepadKeys.Button.DPAD_RIGHT)
+                || driver.getButton(GamepadKeys.Button.DPAD_LEFT)) ? "Manual" : "Auto");
         telemetry.addData("TargetRPM", flywheelPIDF.Shooter.TARGET_RPM);
         telemetry.update();
     }

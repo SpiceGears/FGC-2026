@@ -40,6 +40,7 @@ public final class robotConstants {
     public static final class Arm {
 
         public static final String MOTOR = "armMotor";
+        public static final String POTENTIOMETER = "pot";
 
         public static double UP_POWER = 0.6;
         public static double DOWN_POWER = -0.4;
