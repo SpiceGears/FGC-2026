@@ -14,5 +14,7 @@ public final class flywheelPIDF {
 
         public static double TARGET_RPM = 4300;
         public static double RPM_TOLERANCE = 400;
+        public static double FEED_LOCKOUT_SEC = 0.5;
+        public static double SPINUP_RAMP_SEC = 0.75;
     }
 }

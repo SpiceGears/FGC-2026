@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.util.ElapsedTime;
 import com.seattlesolvers.solverslib.command.SubsystemBase;
 import com.seattlesolvers.solverslib.controller.PIDFController;
 import com.seattlesolvers.solverslib.hardware.motors.Motor;
@@ -25,6 +26,7 @@ public class superStructure extends SubsystemBase {
 
     private Mode mode = Mode.NONE;
     private double direction = 1.0;
+    private final ElapsedTime shooterStartTimer = new ElapsedTime();
 
     public superStructure(HardwareMap hwMap) {
         m1 = new MotorEx(hwMap, robotConstants.SuperStructure.M1);
@@ -57,8 +59,12 @@ public class superStructure extends SubsystemBase {
     public void spinUpShooter() { spinUpShooter(false); }
 
     public void spinUpShooter(boolean reversed) {
+        if (mode != Mode.SHOOTER) {
+            shooterStartTimer.reset();
+        }
         mode = Mode.SHOOTER;
-        double rpm = flywheelPIDF.Shooter.TARGET_RPM;
+        double rampFraction = Math.min(1.0, shooterStartTimer.seconds() / flywheelPIDF.Shooter.SPINUP_RAMP_SEC);
+        double rpm = flywheelPIDF.Shooter.TARGET_RPM * rampFraction;
         pidfShooter.setSetPoint(reversed ? -rpm : rpm);
     }
 
@@ -72,7 +78,9 @@ public class superStructure extends SubsystemBase {
 
     public boolean atSpeed() {
         switch (mode) {
-            case SHOOTER: return pidfShooter.atSetPoint();
+            case SHOOTER:
+                boolean rampComplete = shooterStartTimer.seconds() >= flywheelPIDF.Shooter.SPINUP_RAMP_SEC;
+                return rampComplete && pidfShooter.atSetPoint();
             case INTAKE: return pidfIntake.atSetPoint();
             default: return false;
         }
@@ -80,6 +88,18 @@ public class superStructure extends SubsystemBase {
 
     public Mode getMode() { return mode; }
     public double getVelocityRpm() { return motorUtils.getRPM(m1); }
+
+    public double getTargetRpm() {
+        switch (mode) {
+            case SHOOTER: return pidfShooter.getSetPoint();
+            case INTAKE: return pidfIntake.getSetPoint();
+            default: return 0.0;
+        }
+    }
+
+    public boolean isShooterReadyToFeed() {
+        return mode == Mode.SHOOTER && shooterStartTimer.seconds() >= flywheelPIDF.Shooter.FEED_LOCKOUT_SEC;
+    }
 
     @AutoLogOutput(postToFtcDashboard = false)
     public double getM1Rpm() { return motorUtils.getRPM(m1); }

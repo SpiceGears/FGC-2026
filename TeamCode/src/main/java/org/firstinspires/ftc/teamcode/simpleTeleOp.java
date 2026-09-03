@@ -68,9 +68,10 @@ public class simpleTeleOp extends CommandOpMode {
 
 
         driver.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT)
-                .whileHeld(new feederCommand(feeder, robotConstants.Feeder.UP_POWER));
+                .whileHeld(new feederCommand(feeder, structure, () -> true, () -> false, () -> false));
         driver.getGamepadButton(GamepadKeys.Button.DPAD_LEFT)
-                .whileHeld(new feederCommand(feeder, robotConstants.Feeder.DOWN_POWER));        driver.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER)
+                .whileHeld(new feederCommand(feeder, structure, () -> false, () -> true, () -> false));
+        driver.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER)
                 .whenPressed(structure::toggleDirection);
     }
 

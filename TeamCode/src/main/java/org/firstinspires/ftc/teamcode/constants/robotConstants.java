@@ -23,7 +23,7 @@ public final class robotConstants {
         public static final String SERVO = "clutchServo";
 
         public static double SHOOT = 0.0;
-        public static double INTAKE = 0.8;
+        public static double INTAKE = 0.7;
     }
 
     @Config

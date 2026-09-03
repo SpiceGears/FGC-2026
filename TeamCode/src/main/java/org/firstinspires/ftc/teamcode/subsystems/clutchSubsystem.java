@@ -13,9 +13,12 @@ public class clutchSubsystem extends SubsystemBase {
         shoot();
     }
 
-    public void intake() { clutch.setPosition(robotConstants.Clutch.INTAKE); }
-    public void shoot() { clutch.setPosition(robotConstants.Clutch.SHOOT); }
-    public void setPosition(double position) { clutch.setPosition(position); }
+    public void intake() { setPosition(robotConstants.Clutch.INTAKE); }
+    public void shoot() { setPosition(robotConstants.Clutch.SHOOT); }
+
+    public void setPosition(double position) {
+        clutch.setPosition(position);
+    }
 
     public void stop() {
         shoot();
