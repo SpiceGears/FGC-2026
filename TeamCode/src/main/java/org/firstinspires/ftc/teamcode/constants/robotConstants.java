@@ -14,16 +14,26 @@ public final class robotConstants {
         public static final String M4 = "motor4";
 
         public static double SHOOT_POWER = 1.0;
-        public static double INTAKE_POWER = -0.6;
+        public static double INTAKE_POWER = -1;
+        public static double REVERSE_POWER = 1.0;
     }
 
     @Config
     public static final class Clutch {
 
         public static final String SERVO = "clutchServo";
+        public static final String LEFT_SENSOR = "leftSensor";
+        public static final String RIGHT_SENSOR = "rightSensor";
 
-        public static double SHOOT = 0.0;
-        public static double INTAKE = 0.7;
+        public static double INTAKE_POWER = -0.5; // left
+        public static double SHOOT_POWER = 0.5;   // right
+        public static double BACKOFF_POWER = 0.2;
+
+        public static double TIMEOUT_SEC = 3.5;
+        public static double BACKOFF_TIME_SEC = 0.4;
+
+        public static double SHOOT_POS = 0.0;
+        public static double INTAKE_POS = 0.7;
     }
 
     @Config
@@ -34,6 +44,8 @@ public final class robotConstants {
         public static double FEED_POWER = 1.0;
         public static double UP_POWER = 1.0;
         public static double DOWN_POWER = -1.0;
+
+        public static double FEEDER_THRESHOLD_RPM = 3000.0;
     }
 
     @Config
@@ -42,8 +54,8 @@ public final class robotConstants {
         public static final String MOTOR = "armMotor";
         public static final String POTENTIOMETER = "pot";
 
-        public static double UP_POWER = 0.6;
-        public static double DOWN_POWER = -0.4;
+        public static double UP_POWER = 1;
+        public static double DOWN_POWER = -1;
     }
 
     @Config

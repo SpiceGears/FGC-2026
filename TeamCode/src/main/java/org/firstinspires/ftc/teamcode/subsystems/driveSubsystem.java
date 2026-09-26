@@ -31,8 +31,8 @@ public class driveSubsystem extends SubsystemBase {
     }
 
     public void arcadeDrive(double forward, double turn) {
-        drive.arcadeDrive(forward, turn);
-    }
+            drive.arcadeDrive(forward, turn);
+        }
 
     public void cheesyDrive(double throttle, double wheel, boolean isQuickTurn) {
         throttle = handleDeadband(throttle, robotConstants.Drive.THROTTLE_DEADBAND);

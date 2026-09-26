@@ -76,23 +76,39 @@ public class polandFinal extends CommandOpMode {
     public void run() {
         super.run();
 
+        // SuperStructure
         telemetry.addData("Mode", structure.getMode());
         telemetry.addData("Target RPM", structure.getTargetRpm());
         telemetry.addData("Velocity RPM", structure.getVelocityRpm());
         telemetry.addData("At Speed", structure.atSpeed());
 
+        // Clutch & Sensors
+        telemetry.addData("Clutch State", clutch.getCurrentState());
+        telemetry.addData("Clutch Target", clutch.getTargetState());
+        telemetry.addData("Clutch Power (commanded)", clutch.getPower());
+        telemetry.addData("Clutch L-Sensor (Intake, inverted)", clutch.isAtIntake());
+        telemetry.addData("Clutch R-Sensor (Shoot, inverted)", clutch.isAtShooter());
+        telemetry.addData("Clutch L-Sensor (raw)", clutch.getRawLeftSensor());
+        telemetry.addData("Clutch R-Sensor (raw)", clutch.getRawRightSensor());
+        telemetry.addData("Clutch Retry Count", clutch.getRetryCount());
+        telemetry.addData("Clutch Stalled", clutch.isStalled());
+
+        // Arm Sensors
         telemetry.addData("Arm Position", arm.getMotorPosition());
-        telemetry.addData("Arm Angle", arm.getAngle());
-        telemetry.addData("Arm Target Angle", arm.getTargetAngle());
+//        telemetry.addData("Arm Pot Voltage", arm.getEncoderVoltage());
+//        telemetry.addData("Arm Angle", arm.getAngle());
+//        telemetry.addData("Arm Target Angle", arm.getTargetAngle());
+        telemetry.addData("Arm RPM", arm.getArmRpm());
 
-        telemetry.addData(
-                "Feeder Mode",
-                (driver.getButton(GamepadKeys.Button.DPAD_RIGHT)
-                        || driver.getButton(GamepadKeys.Button.DPAD_LEFT)) ? "Manual" : "Auto"
-        );
+        // Feeder
+        telemetry.addData("Feeder RPM", feeder.getFeederRpm());
+        telemetry.addData("Feeder Mode", (driver.getButton(GamepadKeys.Button.DPAD_RIGHT) || driver.getButton(GamepadKeys.Button.DPAD_LEFT)) ? "Manual" : "Auto");
 
-        telemetry.addData("Reversed", driver.getButton(GamepadKeys.Button.LEFT_BUMPER));
+        // Drive
+        telemetry.addData("Drive L RPM", drive.getLeftRpm());
+        telemetry.addData("Drive R RPM", drive.getRightRpm());
 
+        telemetry.addData("Battery Voltage", hardwareMap.voltageSensor.iterator().next().getVoltage());
         telemetry.update();
     }
 }

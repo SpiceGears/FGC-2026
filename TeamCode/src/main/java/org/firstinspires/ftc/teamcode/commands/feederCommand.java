@@ -31,7 +31,9 @@ public class feederCommand extends CommandBase {
         } else if (manualReverse.getAsBoolean()) {
             feeder.setPower(robotConstants.Feeder.DOWN_POWER);
         } else {
-            boolean feederGateOpen = structure.atSpeed() && structure.isShooterReadyToFeed();
+            boolean isAboveThreshold = Math.abs(structure.getVelocityRpm()) >= robotConstants.Feeder.FEEDER_THRESHOLD_RPM;
+            boolean feederGateOpen = isAboveThreshold && structure.isShooterReadyToFeed();
+
             if (shootHeld.getAsBoolean() && feederGateOpen) {
                 feeder.feed();
             } else {

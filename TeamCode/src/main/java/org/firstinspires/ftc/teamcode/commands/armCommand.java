@@ -1,7 +1,8 @@
 package org.firstinspires.ftc.teamcode.commands;
 
 import com.seattlesolvers.solverslib.command.CommandBase;
-import org.firstinspires.ftc.teamcode.constants.armPIDF;
+//import org.firstinspires.ftc.teamcode.constants.armPIDF;
+import org.firstinspires.ftc.teamcode.constants.robotConstants;
 import org.firstinspires.ftc.teamcode.subsystems.armSubsystem;
 
 import java.util.function.BooleanSupplier;
@@ -18,21 +19,30 @@ public class armCommand extends CommandBase {
         addRequirements(arm);
     }
 
-    @Override
-    public void initialize() {
-        arm.setTargetAngle(armPIDF.Arm.START_ANGLE);
-    }
+//    @Override
+//    public void initialize() {
+//        arm.setTargetAngle(armPIDF.Arm.START_ANGLE);
+//    }
 
     @Override
     public void execute() {
-        double target = arm.getTargetAngle();
         if (jogUp.getAsBoolean()) {
-            target += armPIDF.Arm.JOG_STEP_DEG;
+            arm.setPower(robotConstants.Arm.UP_POWER);
         } else if (jogDown.getAsBoolean()) {
-            target -= armPIDF.Arm.JOG_STEP_DEG;
+            arm.setPower(robotConstants.Arm.DOWN_POWER);
+        } else {
+            arm.stop();
         }
-        arm.setTargetAngle(target);
+
+//        double target = arm.getTargetAngle();
+//        if (jogUp.getAsBoolean()) {
+//            target += armPIDF.Arm.JOG_STEP_DEG;
+//        } else if (jogDown.getAsBoolean()) {
+//            target -= armPIDF.Arm.JOG_STEP_DEG;
+//        }
+//        arm.setTargetAngle(target);
     }
 
     @Override public boolean isFinished() { return false; }
+    @Override public void end(boolean interrupted) { arm.stop(); }
 }

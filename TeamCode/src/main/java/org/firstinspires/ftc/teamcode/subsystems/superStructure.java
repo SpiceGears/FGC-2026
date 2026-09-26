@@ -16,7 +16,7 @@ import Ori.Coval.Logging.AutoLog;
 import Ori.Coval.Logging.AutoLogOutput;
 
 @AutoLog(postToFtcDashboard = false)
-public class superStructure extends SubsystemBase {
+public class    superStructure extends SubsystemBase {
     public enum Mode { NONE, SHOOTER, INTAKE }
 
     private final MotorEx m1, m2, m3, m4;
@@ -34,10 +34,11 @@ public class superStructure extends SubsystemBase {
         m3 = new MotorEx(hwMap, robotConstants.SuperStructure.M3);
         m4 = new MotorEx(hwMap, robotConstants.SuperStructure.M4);
 
-        m1.setInverted(false);
-        m2.setInverted(false);
-        m3.setInverted(true);
-        m4.setInverted(true);
+
+        m1.setInverted(true);
+        m2.setInverted(true);
+        m3.setInverted(false);
+        m4.setInverted(false);
 
         motors = new MotorGroup(m1, m2, m3, m4);
         motors.setRunMode(Motor.RunMode.RawPower);
@@ -68,12 +69,10 @@ public class superStructure extends SubsystemBase {
         pidfShooter.setSetPoint(reversed ? -rpm : rpm);
     }
 
-    public void spinUpIntake() { spinUpIntake(false); }
-
-    public void spinUpIntake(boolean reversed) {
+    public void spinUpIntake() {
         mode = Mode.INTAKE;
         double rpm = intakePIDF.Intake.TARGET_RPM;
-        pidfIntake.setSetPoint(reversed ? rpm : -rpm);
+        pidfIntake.setSetPoint(rpm);
     }
 
     public boolean atSpeed() {
@@ -87,7 +86,17 @@ public class superStructure extends SubsystemBase {
     }
 
     public Mode getMode() { return mode; }
-    public double getVelocityRpm() { return motorUtils.getRPM(m1); }
+
+    public double getVelocityRpm() {
+        double rpm = 0.0;
+        for (MotorEx motor : new MotorEx[]{m1, m2, m3, m4}) {
+            double motorRpm = motorUtils.getRPM(motor);
+            if (Math.abs(motorRpm) > Math.abs(rpm)) {
+                rpm = motorRpm;
+            }
+        }
+        return rpm;
+    }
 
     public double getTargetRpm() {
         switch (mode) {
@@ -113,13 +122,17 @@ public class superStructure extends SubsystemBase {
     @AutoLogOutput(postToFtcDashboard = false)
     public double getM4Rpm() { return motorUtils.getRPM(m4); }
 
-    public void setPower(double power) { motors.set(power * direction); }
+    public void setPower(double power) {
+        mode = Mode.NONE;
+        motors.set(power * direction);
+    }
+
     public void toggleDirection() { direction = -direction; }
     public boolean isReversed() { return direction < 0.0; }
 
     public void stop() {
         mode = Mode.NONE;
-        motors.stopMotor();
+        motors.set(0);
     }
 
     private void refreshGainsFromConstants() {
