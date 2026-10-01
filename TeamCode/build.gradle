@@ -23,6 +23,33 @@ android {
     }
 }
 
+repositories {
+
+    maven { url 'https://jitpack.io' }
+
+    maven {
+        url = 'https://maven.brott.dev/'
+    }
+
+    maven {
+        url "https://repo.dairy.foundation/releases"
+    }
+
+    maven {
+        url "https://repo.dairy.foundation/snapshots"
+    }
+}
+
 dependencies {
     implementation project(':FtcRobotController')
+    annotationProcessor files('lib/OpModeAnnotationProcessor.jar')
+    implementation 'com.github.ori-coval.Koala-Log:KoalaLogger:1.5.8test'
+    annotationProcessor 'com.github.ori-coval.Koala-Log:KoalaLoggingProcessor:1.5.8test'
+
+    // SolversLib: Latest Stable Version
+
+    implementation "org.solverslib:core:0.3.4" // core
+    //    implementation "org.solverslib:photon:0.3.4" // photon is optional (see docs for more info)
+
+    implementation "com.acmerobotics.dashboard:dashboard:0.5.1" // FTC Dashb
 }
