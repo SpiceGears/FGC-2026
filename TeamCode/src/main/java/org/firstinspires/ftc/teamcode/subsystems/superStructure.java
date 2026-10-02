@@ -64,7 +64,9 @@ public class    superStructure extends SubsystemBase {
             shooterStartTimer.reset();
         }
         mode = Mode.SHOOTER;
-        double rampFraction = Math.min(1.0, shooterStartTimer.seconds() / flywheelPIDF.Shooter.SPINUP_RAMP_SEC);
+        double rampFraction = flywheelPIDF.Shooter.SPINUP_RAMP_SEC <= 0.0
+                ? 1.0
+                : Math.min(1.0, shooterStartTimer.seconds() / flywheelPIDF.Shooter.SPINUP_RAMP_SEC);
         double rpm = flywheelPIDF.Shooter.TARGET_RPM * rampFraction;
         pidfShooter.setSetPoint(reversed ? -rpm : rpm);
     }
