@@ -1,0 +1,63 @@
+package org.firstinspires.ftc.teamcode.commands;
+
+import com.seattlesolvers.solverslib.command.CommandBase;
+import org.firstinspires.ftc.teamcode.constants.robotConstants;
+import org.firstinspires.ftc.teamcode.subsystems.clutchServoSubsystem;
+import org.firstinspires.ftc.teamcode.subsystems.superStructure;
+
+import java.util.function.BooleanSupplier;
+
+public class superStructureServoClutchCommand extends CommandBase {
+    private final superStructure structure;
+    private final clutchServoSubsystem clutch;
+    private final BooleanSupplier shootHeld;
+    private final BooleanSupplier intakeHeld;
+    private final BooleanSupplier reversed;
+    private final BooleanSupplier rawShootHeld;
+    private final BooleanSupplier rawIntakeHeld;
+
+    // rawShootHeld / rawIntakeHeld run the superstructure at fixed power, without the shooter PIDF (so no auto-feed).
+    public superStructureServoClutchCommand(superStructure structure, clutchServoSubsystem clutch,
+            BooleanSupplier shootHeld, BooleanSupplier intakeHeld, BooleanSupplier reversed,
+            BooleanSupplier rawShootHeld, BooleanSupplier rawIntakeHeld) {
+        this.structure = structure;
+        this.clutch = clutch;
+        this.shootHeld = shootHeld;
+        this.intakeHeld = intakeHeld;
+        this.reversed = reversed;
+        this.rawShootHeld = rawShootHeld;
+        this.rawIntakeHeld = rawIntakeHeld;
+        addRequirements(structure, clutch);
+    }
+
+    @Override
+    public void execute() {
+        if (reversed.getAsBoolean()) {
+            structure.setPower(robotConstants.SuperStructure.REVERSE_POWER);
+        } else if (shootHeld.getAsBoolean()) {
+            clutch.shoot();
+            structure.spinUpShooter(true);
+        } else if (intakeHeld.getAsBoolean()) {
+            clutch.intake();
+            structure.setPower(robotConstants.SuperStructure.INTAKE_POWER);
+        } else if (rawShootHeld.getAsBoolean()) {
+            clutch.shoot();
+            structure.setPower(-robotConstants.SuperStructure.SHOOT_POWER);
+        } else if (rawIntakeHeld.getAsBoolean()) {
+            clutch.intake();
+            structure.setPower(robotConstants.SuperStructure.INTAKE_POWER);
+        } else {
+            structure.stop();
+        }
+    }
+
+    @Override
+    public boolean isFinished() {
+        return false;
+    }
+
+    @Override
+    public void end(boolean interrupted) {
+        structure.stop();
+    }
+}
