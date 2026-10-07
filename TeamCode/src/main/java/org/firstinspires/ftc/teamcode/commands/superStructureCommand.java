@@ -13,14 +13,20 @@ public class superStructureCommand extends CommandBase {
     private final BooleanSupplier shootHeld;
     private final BooleanSupplier intakeHeld;
     private final BooleanSupplier reversed;
+    private final BooleanSupplier rawShootHeld;
+    private final BooleanSupplier rawIntakeHeld;
 
+    // rawShootHeld / rawIntakeHeld run the superstructure at fixed power, without the shooter PIDF (so no auto-feed).
     public superStructureCommand(superStructure structure, clutchSubsystem clutch,
-            BooleanSupplier shootHeld, BooleanSupplier intakeHeld, BooleanSupplier reversed) {
+            BooleanSupplier shootHeld, BooleanSupplier intakeHeld, BooleanSupplier reversed,
+            BooleanSupplier rawShootHeld, BooleanSupplier rawIntakeHeld) {
         this.structure = structure;
         this.clutch = clutch;
         this.shootHeld = shootHeld;
         this.intakeHeld = intakeHeld;
         this.reversed = reversed;
+        this.rawShootHeld = rawShootHeld;
+        this.rawIntakeHeld = rawIntakeHeld;
         addRequirements(structure, clutch);
     }
 
@@ -32,6 +38,12 @@ public class superStructureCommand extends CommandBase {
             clutch.shoot();
             structure.spinUpShooter(false);
         } else if (intakeHeld.getAsBoolean()) {
+            clutch.intake();
+            structure.setPower(robotConstants.SuperStructure.INTAKE_POWER);
+        } else if (rawShootHeld.getAsBoolean()) {
+            clutch.shoot();
+            structure.setPower(robotConstants.SuperStructure.SHOOT_POWER);
+        } else if (rawIntakeHeld.getAsBoolean()) {
             clutch.intake();
             structure.setPower(robotConstants.SuperStructure.INTAKE_POWER);
         } else {

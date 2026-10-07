@@ -17,7 +17,7 @@ import Ori.Coval.Logging.AutoLogOutput;
 
 @AutoLog(postToFtcDashboard = false)
 public class    superStructure extends SubsystemBase {
-    public enum Mode { NONE, SHOOTER, INTAKE }
+    public enum Mode { NONE, SHOOTER, INTAKE, UNJAM }
 
     private final MotorEx m1, m2, m3, m4;
     private final MotorGroup motors;
@@ -45,11 +45,9 @@ public class    superStructure extends SubsystemBase {
 
         pidfShooter = new PIDFController(flywheelPIDF.Shooter.KP, flywheelPIDF.Shooter.KI,
                 flywheelPIDF.Shooter.KD, flywheelPIDF.Shooter.KF);
-        pidfShooter.setTolerance(flywheelPIDF.Shooter.RPM_TOLERANCE, Double.POSITIVE_INFINITY);
 
         pidfIntake = new PIDFController(intakePIDF.Intake.KP, intakePIDF.Intake.KI,
                 intakePIDF.Intake.KD, intakePIDF.Intake.KF);
-        pidfIntake.setTolerance(intakePIDF.Intake.RPM_TOLERANCE, Double.POSITIVE_INFINITY);
     }
 
     public void setTargetRpm(double rpm) {
@@ -60,6 +58,17 @@ public class    superStructure extends SubsystemBase {
     public void spinUpShooter() { spinUpShooter(false); }
 
     public void spinUpShooter(boolean reversed) {
+        if (mode == Mode.UNJAM) {
+            return;
+        }
+        if (mode == Mode.SHOOTER
+                && shooterStartTimer.seconds() >= flywheelPIDF.Shooter.JAM_TIMEOUT_SEC
+                && Math.abs(getVelocityRpm()) < flywheelPIDF.Shooter.JAM_MIN_RPM) {
+            // Shooter failed to spin up in time: run it backwards until the shoot button is released.
+            mode = Mode.UNJAM;
+            motors.set(-Math.signum(pidfShooter.getSetPoint()) * flywheelPIDF.Shooter.JAM_REVERSE_POWER);
+            return;
+        }
         if (mode != Mode.SHOOTER) {
             shooterStartTimer.reset();
         }
@@ -77,18 +86,29 @@ public class    superStructure extends SubsystemBase {
         pidfIntake.setSetPoint(rpm);
     }
 
+    @AutoLogOutput(postToFtcDashboard = false)
     public boolean atSpeed() {
         switch (mode) {
             case SHOOTER:
                 boolean rampComplete = shooterStartTimer.seconds() >= flywheelPIDF.Shooter.SPINUP_RAMP_SEC;
-                return rampComplete && pidfShooter.atSetPoint();
-            case INTAKE: return pidfIntake.atSetPoint();
+                return rampComplete && isWithinDropTolerance(pidfShooter.getSetPoint(), flywheelPIDF.Shooter.RPM_TOLERANCE);
+            case INTAKE: return isWithinDropTolerance(pidfIntake.getSetPoint(), intakePIDF.Intake.RPM_TOLERANCE);
             default: return false;
         }
     }
 
+    // RPM may exceed the setpoint freely; tolerance only limits how far it can drop below it.
+    // Not private: AutoLog generates an override for every value-returning method.
+    protected boolean isWithinDropTolerance(double setPointRpm, double toleranceRpm) {
+        double drop = (setPointRpm - getVelocityRpm()) * Math.signum(setPointRpm);
+        return drop <= toleranceRpm;
+    }
+
     public Mode getMode() { return mode; }
 
+    public boolean isJammed() { return mode == Mode.UNJAM; }
+
+    @AutoLogOutput(postToFtcDashboard = false)
     public double getVelocityRpm() {
         double rpm = 0.0;
         for (MotorEx motor : new MotorEx[]{m1, m2, m3, m4}) {
@@ -100,6 +120,7 @@ public class    superStructure extends SubsystemBase {
         return rpm;
     }
 
+    @AutoLogOutput(postToFtcDashboard = false)
     public double getTargetRpm() {
         switch (mode) {
             case SHOOTER: return pidfShooter.getSetPoint();
@@ -108,8 +129,15 @@ public class    superStructure extends SubsystemBase {
         }
     }
 
+    @AutoLogOutput(postToFtcDashboard = false)
     public boolean isShooterReadyToFeed() {
-        return mode == Mode.SHOOTER && shooterStartTimer.seconds() >= flywheelPIDF.Shooter.FEED_LOCKOUT_SEC;
+        double lockout = Math.max(flywheelPIDF.Shooter.FEED_LOCKOUT_SEC, robotConstants.Feeder.MIN_SHOOT_TO_FEED_SEC);
+        return mode == Mode.SHOOTER && shooterStartTimer.seconds() >= lockout;
+    }
+
+    @AutoLogOutput(postToFtcDashboard = false)
+    public double getShooterModeSec() {
+        return mode == Mode.SHOOTER ? shooterStartTimer.seconds() : 0.0;
     }
 
     @AutoLogOutput(postToFtcDashboard = false)
@@ -139,9 +167,7 @@ public class    superStructure extends SubsystemBase {
 
     private void refreshGainsFromConstants() {
         pidfShooter.setPIDF(flywheelPIDF.Shooter.KP, flywheelPIDF.Shooter.KI, flywheelPIDF.Shooter.KD, flywheelPIDF.Shooter.KF);
-        pidfShooter.setTolerance(flywheelPIDF.Shooter.RPM_TOLERANCE, Double.POSITIVE_INFINITY);
         pidfIntake.setPIDF(intakePIDF.Intake.KP, intakePIDF.Intake.KI, intakePIDF.Intake.KD, intakePIDF.Intake.KF);
-        pidfIntake.setTolerance(intakePIDF.Intake.RPM_TOLERANCE, Double.POSITIVE_INFINITY);
     }
 
     @Override
@@ -155,6 +181,7 @@ public class    superStructure extends SubsystemBase {
             case INTAKE:
                 motors.set(pidfIntake.calculate(getVelocityRpm()));
                 break;
+            case UNJAM:
             case NONE:
             default:
                 break;

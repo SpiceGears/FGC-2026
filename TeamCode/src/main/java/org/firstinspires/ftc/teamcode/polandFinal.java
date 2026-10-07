@@ -12,10 +12,19 @@ import org.firstinspires.ftc.teamcode.commands.cheesyDriveCommand;
 import org.firstinspires.ftc.teamcode.commands.feederCommand;
 import org.firstinspires.ftc.teamcode.commands.superStructureCommand;
 import org.firstinspires.ftc.teamcode.subsystems.armSubsystem;
+import org.firstinspires.ftc.teamcode.subsystems.armSubsystemAutoLogged;
 import org.firstinspires.ftc.teamcode.subsystems.clutchSubsystem;
+import org.firstinspires.ftc.teamcode.subsystems.clutchSubsystemAutoLogged;
 import org.firstinspires.ftc.teamcode.subsystems.driveSubsystem;
+import org.firstinspires.ftc.teamcode.subsystems.driveSubsystemAutoLogged;
 import org.firstinspires.ftc.teamcode.subsystems.feederSubsystem;
+import org.firstinspires.ftc.teamcode.subsystems.feederSubsystemAutoLogged;
 import org.firstinspires.ftc.teamcode.subsystems.superStructure;
+import org.firstinspires.ftc.teamcode.subsystems.superStructureAutoLogged;
+
+import Ori.Coval.Logging.AutoLogManager;
+import Ori.Coval.Logging.Logger.KoalaGamepadLogger;
+import Ori.Coval.Logging.Logger.KoalaLog;
 
 @TeleOp(name = "PolandFinal", group = "SmartTeleop")
 public class polandFinal extends CommandOpMode {
@@ -27,16 +36,24 @@ public class polandFinal extends CommandOpMode {
     private driveSubsystem drive;
 
     private GamepadEx driver;
+    private GamepadEx operator;
 
     @Override
     public void initialize() {
-        structure = new superStructure(hardwareMap);
-        clutch = new clutchSubsystem(hardwareMap);
-        feeder = new feederSubsystem(hardwareMap);
-        arm = new armSubsystem(hardwareMap);
-        drive = new driveSubsystem(hardwareMap);
+        reset();
+
+        KoalaLog.setup(hardwareMap);
+        KoalaLog.start();
+        KoalaGamepadLogger.register(gamepad1, gamepad2);
+
+        structure = new superStructureAutoLogged(hardwareMap);
+        clutch = new clutchSubsystemAutoLogged(hardwareMap);
+        feeder = new feederSubsystemAutoLogged(hardwareMap);
+        arm = new armSubsystemAutoLogged(hardwareMap);
+        drive = new driveSubsystemAutoLogged(hardwareMap);
 
         driver = new GamepadEx(gamepad1);
+        operator = new GamepadEx(gamepad2);
 
         register(structure, clutch, feeder, arm, drive);
 
@@ -52,21 +69,23 @@ public class polandFinal extends CommandOpMode {
                 clutch,
                 () -> driver.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.5,
                 () -> driver.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) > 0.5,
-                () -> driver.getButton(GamepadKeys.Button.LEFT_BUMPER)
+                () -> driver.getButton(GamepadKeys.Button.LEFT_BUMPER) || operator.getButton(GamepadKeys.Button.LEFT_BUMPER),
+                () -> operator.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.5,
+                () -> operator.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) > 0.5
         ));
 
         feeder.setDefaultCommand(new feederCommand(
                 feeder,
                 structure,
-                () -> driver.getButton(GamepadKeys.Button.DPAD_RIGHT),
-                () -> driver.getButton(GamepadKeys.Button.DPAD_LEFT),
+                () -> driver.getButton(GamepadKeys.Button.DPAD_RIGHT) || operator.getButton(GamepadKeys.Button.DPAD_RIGHT),
+                () -> driver.getButton(GamepadKeys.Button.DPAD_LEFT) || operator.getButton(GamepadKeys.Button.DPAD_LEFT),
                 () -> driver.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.5
         ));
 
         arm.setDefaultCommand(new armCommand(
                 arm,
-                () -> driver.getButton(GamepadKeys.Button.LEFT_STICK_BUTTON),
-                () -> driver.getButton(GamepadKeys.Button.RIGHT_STICK_BUTTON)
+                () -> driver.getButton(GamepadKeys.Button.LEFT_STICK_BUTTON) || operator.getButton(GamepadKeys.Button.B),
+                () -> driver.getButton(GamepadKeys.Button.RIGHT_STICK_BUTTON) || operator.getButton(GamepadKeys.Button.A)
         ));
 
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
@@ -75,6 +94,11 @@ public class polandFinal extends CommandOpMode {
     @Override
     public void run() {
         super.run();
+
+        AutoLogManager.periodic();
+        KoalaLog.log("Mode", structure.getMode(), false);
+        KoalaLog.log("Feeder Mode", (driver.getButton(GamepadKeys.Button.DPAD_RIGHT) || operator.getButton(GamepadKeys.Button.DPAD_RIGHT) || driver.getButton(GamepadKeys.Button.DPAD_LEFT) || operator.getButton(GamepadKeys.Button.DPAD_LEFT)) ? "Manual" : "Auto", false);
+        KoalaLog.log("Battery Voltage", hardwareMap.voltageSensor.iterator().next().getVoltage(), false);
 
         // SuperStructure
         telemetry.addData("Mode", structure.getMode());
@@ -102,7 +126,7 @@ public class polandFinal extends CommandOpMode {
 
         // Feeder
         telemetry.addData("Feeder RPM", feeder.getFeederRpm());
-        telemetry.addData("Feeder Mode", (driver.getButton(GamepadKeys.Button.DPAD_RIGHT) || driver.getButton(GamepadKeys.Button.DPAD_LEFT)) ? "Manual" : "Auto");
+        telemetry.addData("Feeder Mode", (driver.getButton(GamepadKeys.Button.DPAD_RIGHT) || operator.getButton(GamepadKeys.Button.DPAD_RIGHT) || driver.getButton(GamepadKeys.Button.DPAD_LEFT) || operator.getButton(GamepadKeys.Button.DPAD_LEFT)) ? "Manual" : "Auto");
 
         // Drive
         telemetry.addData("Drive L RPM", drive.getLeftRpm());
@@ -110,5 +134,14 @@ public class polandFinal extends CommandOpMode {
 
         telemetry.addData("Battery Voltage", hardwareMap.voltageSensor.iterator().next().getVoltage());
         telemetry.update();
+    }
+
+    @Override
+    public void runOpMode() throws InterruptedException {
+        try {
+            super.runOpMode();
+        } finally {
+            KoalaLog.stop();
+        }
     }
 }

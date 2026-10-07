@@ -46,6 +46,7 @@ public final class robotConstants {
         public static double DOWN_POWER = -1.0;
 
         public static double FEEDER_THRESHOLD_RPM = 3000.0;
+        public static double MIN_SHOOT_TO_FEED_SEC = 1.0;
     }
 
     @Config

@@ -48,8 +48,8 @@ dependencies {
 
     // SolversLib: Latest Stable Version
 
-    implementation "org.solverslib:core:0.3.4" // core
-    //    implementation "org.solverslib:photon:0.3.4" // photon is optional (see docs for more info)
+    implementation "org.solverslib:core:0.3.6" // core
+    //    implementation "org.solverslib:photon:0.3.6" // photon is optional (see docs for more info)
 
-    implementation "com.acmerobotics.dashboard:dashboard:0.5.1" // FTC Dashb
+    implementation "com.acmerobotics.dashboard:dashboard:0.6.0" // FTC Dashb
 }

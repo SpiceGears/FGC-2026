@@ -54,12 +54,16 @@ public class armSubsystem extends SubsystemBase {
         arm.set(power);
     }
 
+    @AutoLogOutput(postToFtcDashboard = false)
     public int getMotorPosition() { return arm.getCurrentPosition(); }
 
+    @AutoLogOutput(postToFtcDashboard = false)
     public double getEncoderVoltage() { return pot.getVoltage(); }
     public double getAngle() { return lut.get(pot.getVoltage()); }
 
+    @AutoLogOutput(postToFtcDashboard = false)
     public double getTargetAngle() { return targetAngle; }
+    @AutoLogOutput(postToFtcDashboard = false)
     public boolean isHolding() { return holding; }
 
     public void holdCurrentAngle() {

@@ -7,9 +7,12 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.seattlesolvers.solverslib.command.CommandOpMode;
 import com.seattlesolvers.solverslib.gamepad.GamepadEx;
 
+import org.firstinspires.ftc.teamcode.commands.armCommand;
 import org.firstinspires.ftc.teamcode.commands.cheesyDriveCommand;
 import org.firstinspires.ftc.teamcode.commands.feederCommand;
 import org.firstinspires.ftc.teamcode.commands.superStructureCommand;
+import org.firstinspires.ftc.teamcode.subsystems.armSubsystem;
+import org.firstinspires.ftc.teamcode.subsystems.armSubsystemAutoLogged;
 import org.firstinspires.ftc.teamcode.subsystems.clutchSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.driveSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.driveSubsystemAutoLogged;
@@ -28,11 +31,13 @@ public class simpleTeleOp extends CommandOpMode {
     private superStructure structure;
     private clutchSubsystem clutch;
     private feederSubsystem feeder;
+    private armSubsystem arm;
     private driveSubsystem drive;
     private GamepadEx driver;
 
     @Override
     public void initialize() {
+        reset();
 
         for (LynxModule module : hardwareMap.getAll(LynxModule.class)) {
             module.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
@@ -48,10 +53,11 @@ public class simpleTeleOp extends CommandOpMode {
         structure = new superStructureAutoLogged(hardwareMap);
         clutch = new clutchSubsystem(hardwareMap);
         feeder = new feederSubsystemAutoLogged(hardwareMap);
+        arm = new armSubsystemAutoLogged(hardwareMap);
         drive = new driveSubsystemAutoLogged(hardwareMap);
 
         driver = new GamepadEx(gamepad1);
-        register(structure, clutch, feeder, drive);
+        register(structure, clutch, feeder, arm, drive);
 
         drive.setDefaultCommand(new cheesyDriveCommand(
                 drive,
@@ -64,13 +70,20 @@ public class simpleTeleOp extends CommandOpMode {
                 clutch,
                 () -> gamepad1.right_trigger > 0.5,
                 () -> gamepad1.left_trigger > 0.5,
-                () -> gamepad1.left_bumper));
+                () -> gamepad1.left_bumper || gamepad2.left_bumper,
+                () -> gamepad2.right_trigger > 0.5,
+                () -> gamepad2.left_trigger > 0.5));
 
         feeder.setDefaultCommand(new feederCommand(
                 feeder, structure,
-                () -> gamepad1.dpad_right,
-                () -> gamepad1.dpad_left,
+                () -> gamepad1.dpad_right || gamepad2.dpad_right,
+                () -> gamepad1.dpad_left || gamepad2.dpad_left,
                 () -> gamepad1.right_trigger > 0.5));
+
+        arm.setDefaultCommand(new armCommand(
+                arm,
+                () -> gamepad1.left_stick_button || gamepad2.b,
+                () -> gamepad1.right_stick_button || gamepad2.a));
     }
 
     @Override
